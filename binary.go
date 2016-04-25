@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/juju/utils/series"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -43,12 +42,15 @@ func ParseBinary(s string) (Binary, error) {
 	if m == nil {
 		return Binary{}, fmt.Errorf("invalid binary version %q", s)
 	}
+	return parseBinary(m), nil
+}
+
+func parseBinary(m []string) Binary {
 	var b Binary
 	b.Number = parseNumber(m)
 	b.Series = m[7]
 	b.Arch = m[8]
-	_, err := series.GetOSFromSeries(b.Series)
-	return b, err
+	return b
 }
 
 // String returns the string representation of the binary version.
