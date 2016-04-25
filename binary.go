@@ -16,10 +16,15 @@ const binaryPat = numberPat + `-([^-]+)-([^-]+)`
 
 var binaryRE = regexp.MustCompile(`^` + binaryPat + `$`)
 
+// Binary represents the version and target platform of a binary.
 type Binary struct {
 	Number
+
+	// Series is the targeted host OS release.
 	Series string
-	Arch   string
+
+	// Arch is the targeted host architecture.
+	Arch string
 }
 
 // MustParseBinary parses a binary version and panics if it does

@@ -24,10 +24,17 @@ var Zero = Number{}
 
 // Number represents a version number.
 type Number struct {
+	// Major, Minor, and Patch are the typical 3-tuple version number.
+	// If there is a tag then the patch number applies to the tag,
+	// e.g. "rc1".
 	Major int
 	Minor int
-	Tag   string
 	Patch int
+
+	// Tag is the release tag, e.g. "rc", "beta"
+	Tag string
+
+	// Build identifies the build of the version.
 	Build int
 }
 
