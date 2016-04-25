@@ -1,7 +1,6 @@
 // Copyright 2012, 2013 Canonical Ltd.
 // Licensed under the AGPLv3, see LICENCE file for details.
 
-// Package version implements version parsing.
 package version
 
 import (
@@ -13,9 +12,10 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-var binaryPat = regexp.MustCompile(`^(\d{1,9})\.(\d{1,9})(\.|-(\w+))(\d{1,9})(\.\d{1,9})?-([^-]+)-([^-]+)$`)
+const binaryPat = numberPat + `-([^-]+)-([^-]+)`
 
-// Binary specifies a binary version of juju.v
+var binaryRE = regexp.MustCompile(`^` + binaryPat + `$`)
+
 type Binary struct {
 	Number
 	Series string
@@ -34,18 +34,12 @@ func MustParseBinary(s string) Binary {
 
 // ParseBinary parses a binary version of the form "1.2.3-series-arch".
 func ParseBinary(s string) (Binary, error) {
-	m := binaryPat.FindStringSubmatch(s)
+	m := binaryRE.FindStringSubmatch(s)
 	if m == nil {
 		return Binary{}, fmt.Errorf("invalid binary version %q", s)
 	}
 	var b Binary
-	b.Major = atoi(m[1])
-	b.Minor = atoi(m[2])
-	b.Tag = m[4]
-	b.Patch = atoi(m[5])
-	if m[6] != "" {
-		b.Build = atoi(m[6][1:])
-	}
+	b.Number = parseNumber(m)
 	b.Series = m[7]
 	b.Arch = m[8]
 	_, err := series.GetOSFromSeries(b.Series)

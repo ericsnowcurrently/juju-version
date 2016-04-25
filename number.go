@@ -1,6 +1,7 @@
 // Copyright 2012, 2013 Canonical Ltd.
 // Licensed under the AGPLv3, see LICENCE file for details.
 
+// Package version implements version parsing.
 package version
 
 import (
@@ -13,11 +14,13 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+const numberPat = `(\d{1,9})\.(\d{1,9})(\.|-(\w+))(\d{1,9})(\.\d{1,9})?`
+
+var numberRE = regexp.MustCompile(`^` + numberPat + `$`)
+
 // Zero is occasionally convenient and readable.
 // Please don't change its value.
 var Zero = Number{}
-
-var numberPat = regexp.MustCompile(`^(\d{1,9})\.(\d{1,9})(\.|-(\w+))(\d{1,9})(\.\d{1,9})?$`)
 
 // Number represents a version number.
 type Number struct {
@@ -42,10 +45,14 @@ func MustParse(s string) Number {
 // giving the major, minor and release versions
 // respectively.
 func Parse(s string) (Number, error) {
-	m := numberPat.FindStringSubmatch(s)
+	m := numberRE.FindStringSubmatch(s)
 	if m == nil {
 		return Number{}, fmt.Errorf("invalid version %q", s)
 	}
+	return parseNumber(m), nil
+}
+
+func parseNumber(m []string) Number {
 	var n Number
 	n.Major = atoi(m[1])
 	n.Minor = atoi(m[2])
@@ -54,7 +61,7 @@ func Parse(s string) (Number, error) {
 	if m[6] != "" {
 		n.Build = atoi(m[6][1:])
 	}
-	return n, nil
+	return n
 }
 
 // atoi is the same as strconv.Atoi but assumes that
